@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "768687652620",
+    "project_id": "enta-83352",
+    "storage_bucket": "enta-83352.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768687652620:android:2ed15a3141609476265329",
+        "android_client_info": {
+          "package_name": "com.example.enta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "768687652620-6u1utc1ua01ot2cl8ruijakqcets2nak.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.enta",
+            "certificate_hash": "a18dd61c95567def6d068c7b1fd0c73777f2ddad"
+          }
+        },
+        {
+          "client_id": "768687652620-4udohvr1i9338ehpaquucuaifk4u24nk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhVPwhzsL3XS1aU_EMcdCsbtYaAYkIkjA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "768687652620-4udohvr1i9338ehpaquucuaifk4u24nk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
