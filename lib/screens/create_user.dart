@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enta/model/usermodel.dart';
+import 'package:enta/screens/user_login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CreateUser extends StatefulWidget {
   const CreateUser({Key? key}) : super(key: key);
@@ -9,6 +14,9 @@ class CreateUser extends StatefulWidget {
 
 class _CreateUserState extends State<CreateUser> {
   //parameters of the class
+
+  final _auth = FirebaseAuth.instance;
+
   //form key
   final _formKey = GlobalKey<FormState>();
 
@@ -19,13 +27,24 @@ class _CreateUserState extends State<CreateUser> {
 
   @override
   Widget build(BuildContext context) {
-
     //usernameField
     final userNameField = TextFormField(
       autofocus: false,
       controller: userNameController,
       keyboardType: TextInputType.name,
-      //validator: ,
+
+      //validator (usernameField validation)
+      validator: (value) {
+        RegExp regExp = RegExp(r'^.{3,}$');
+        if (value!.isEmpty) {
+          return ("user is required");
+        }
+        if (!regExp.hasMatch(value)) {
+          return ("enter username minimum of 3 characters");
+        }
+        return null;
+      },
+
       onSaved: (value) {
         emailAddressController.text = value!;
       },
@@ -35,7 +54,7 @@ class _CreateUserState extends State<CreateUser> {
       decoration: InputDecoration(
           prefixIcon: const Icon(Icons.account_circle),
           contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Email Address",
+          hintText: "Username",
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
           )),
@@ -46,7 +65,22 @@ class _CreateUserState extends State<CreateUser> {
       autofocus: false,
       controller: emailAddressController,
       keyboardType: TextInputType.emailAddress,
-      //validator: ,
+
+      //validator (validate emailField)
+      validator: (value) {
+        if (value!.isEmpty) {
+          return ("Email is required");
+        }
+
+        //reg expression for email validation
+        if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`"
+                r"{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+            .hasMatch(value)) {
+          return ("Kindly enter a valid email!!");
+        }
+        //if the field has nothing
+        return null;
+      },
       onSaved: (value) {
         emailAddressController.text = value!;
       },
@@ -56,7 +90,7 @@ class _CreateUserState extends State<CreateUser> {
       decoration: InputDecoration(
           prefixIcon: const Icon(Icons.mail),
           contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Email Address",
+          hintText: "Email address",
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
           )),
@@ -67,7 +101,19 @@ class _CreateUserState extends State<CreateUser> {
       autofocus: false,
       controller: userPasswordController,
       obscureText: true,
-      //validator: ,
+
+      //password validator, telling the user to enter minimum of six characters
+      validator: (value) {
+        RegExp regExp = RegExp(r'^>{6},$');
+        if (value!.isEmpty) {
+          return ("password is required");
+        }
+        if (regExp.hasMatch(value)) {
+          return ("enter password, minimum of 6 characters");
+        }
+        //if the field has nothing
+        return null;
+      },
       onSaved: (value) {
         userPasswordController.text = value!;
       },
@@ -91,11 +137,15 @@ class _CreateUserState extends State<CreateUser> {
       child: MaterialButton(
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
-        onPressed: () {}, //anonymous function
+
+        //assigning createUser function to the registerButton
+        onPressed: () {
+          createUser(emailAddressController.text, userPasswordController.text);
+        }, //anonymous function
         child: const Text(
           "Create",
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 20, color: Colors.black, fontWeight: FontWeight.w700),
         ),
       ),
@@ -117,7 +167,7 @@ class _CreateUserState extends State<CreateUser> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       SizedBox(
-                        height: 200,
+                        height: 100,
                         child: Image.asset(
                           "assets/add_user.png",
                           fit: BoxFit.contain,
@@ -153,6 +203,33 @@ class _CreateUserState extends State<CreateUser> {
                       const SizedBox(
                         height: 15,
                       ),
+                      Row(children: <Widget>[
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        const Text(
+                          'Already have an account?',
+                          style: TextStyle(
+                            fontSize: 17,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => UserLogin()));
+                          },
+                          child: const Text(
+                            "  Login",
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        )
+                      ]),
                     ]),
               ),
             ),
@@ -160,5 +237,44 @@ class _CreateUserState extends State<CreateUser> {
         ),
       ),
     );
+  }
+
+  //user creation function
+  void createUser(String email, String password) async {
+    //meaning -> if _formKey validation is successful, we wait for authentication
+    if (_formKey.currentState!.validate()) {
+      await _auth
+          .createUserWithEmailAndPassword(email: email, password: password)
+          .then((value) => {postDetailsToFirestore()})
+          .catchError((exception) {
+        Fluttertoast.showToast(msg: "e!.message");
+      });
+    }
+  }
+
+  //posting details function
+  postDetailsToFirestore() async {
+    //calling  fireStore
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    User? user = _auth.currentUser;
+
+    //calling UserModel
+    UserModel userModel = UserModel();
+
+    //sending these values
+    userModel.email = user!.email;
+    userModel.uid = user.uid;
+    userModel.username = userNameController.text;
+
+    //add firebaseFirestore
+    await firebaseFirestore
+        .collection("users")
+        .doc(user.uid)
+        .set(userModel.toMap());
+    Fluttertoast.showToast(msg: "user created successfully");
+
+    //navigating to logicScreen
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:
+        (context) => UserLogin()), (route) => false);
   }
 }

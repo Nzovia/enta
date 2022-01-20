@@ -1,6 +1,8 @@
+import 'package:enta/screens/successful_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserLogin extends StatefulWidget {
   const UserLogin({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _UserLoginState extends State<UserLogin> {
 
   @override
   Widget build(BuildContext context) {
+
     //email field
     final emailField = TextFormField(
       autofocus: false,
@@ -33,13 +36,17 @@ class _UserLoginState extends State<UserLogin> {
         if(value!.isEmpty){
           return ("Email is required");
         }
+        //reg expression for email validation
+        if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`"
+        r"{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value))
+        {
+        return ("Kindly enter a valid email!!");
+        }
+
+        //if the field has nothing
+        return null;
       },
 
-      //reg expression for email validation
-      if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`"
-        r"{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatchValue(value){
-        return ("Kindly enter a valid email!!";)
-    })
       onSaved: (value) {
         emailController.text = value!;
       },
@@ -47,8 +54,8 @@ class _UserLoginState extends State<UserLogin> {
 
       //styling the email field
       decoration: InputDecoration(
-          prefixIcon: Icon(Icons.mail),
-          contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+          prefixIcon: const Icon(Icons.mail),
+          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
           hintText: "Email Address",
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -60,7 +67,19 @@ class _UserLoginState extends State<UserLogin> {
       autofocus: false,
       controller: passwordController,
       obscureText: true,
-      //validator: ,
+
+      //password validator, telling the user to enter minimum of six characters
+      validator: (value){
+        RegExp regExp = RegExp(r'^>{6},$');
+        if(value!.isEmpty){
+          return ("password is required");
+        }
+        if(regExp.hasMatch(value)){
+          return ("enter password, minimum of 6 characters");
+        }
+        //if the field has nothing
+        return null;
+      },
       onSaved: (value) {
         passwordController.text = value!;
       },
@@ -68,8 +87,8 @@ class _UserLoginState extends State<UserLogin> {
 
       //styling the password field
       decoration: InputDecoration(
-          prefixIcon: Icon(Icons.vpn_key),
-          contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+          prefixIcon: const Icon(Icons.vpn_key),
+          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
           hintText: "Password",
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -82,12 +101,14 @@ class _UserLoginState extends State<UserLogin> {
       borderRadius: BorderRadius.circular(30),
       color: Colors.greenAccent,
       child: MaterialButton(
-        padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
-        onPressed: () {
 
+        //assigning login function to the login button
+        onPressed: () {
+          login(emailController.text, passwordController.text);
         }, //anonymous function
-        child: Text(
+        child: const Text(
           "Login",
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -118,10 +139,10 @@ class _UserLoginState extends State<UserLogin> {
                           fit: BoxFit.contain,
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
-                      Text(
+                      const Text(
                         "ENTA",
                         style: TextStyle(
                           color: Colors.grey,
@@ -129,19 +150,19 @@ class _UserLoginState extends State<UserLogin> {
                           fontSize: 40,
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 45,
                       ),
                       emailField,
-                      SizedBox(
+                      const SizedBox(
                         height: 25,
                       ),
                       passwordField,
-                      SizedBox(
+                      const SizedBox(
                         height: 35,
                       ),
                       loginButton,
-                      SizedBox(
+                      const SizedBox(
                         height: 15,
                       ),
                     ]),
@@ -152,4 +173,22 @@ class _UserLoginState extends State<UserLogin> {
       ),
     );
   }
+
+  //login function
+  void login(String email, String password) async
+  {
+    if(_formKey.currentState!.validate()){
+    await _auth.signInWithEmailAndPassword(email: email, password: password)
+        .then((uid) => {
+          Fluttertoast.showToast(msg: "login successful"),
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)
+      =>const SuccessLoginLogout()))
+    }).catchError((exception){
+      Fluttertoast.showToast(msg: exception!.message);
+    });
+  }
+
+  }
 }
+
+

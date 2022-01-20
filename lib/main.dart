@@ -1,8 +1,14 @@
 import 'package:enta/screens/movies.dart';
 import 'package:enta/screens/welcome_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async {
+
+  //initializing firebaseApp
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -18,7 +24,7 @@ class MyApp extends StatelessWidget {
 
         primarySwatch: Colors.blue,
       ),
-      home: Welcome(),
+      home: const Welcome(),
     );
   }
 }

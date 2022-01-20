@@ -88,7 +88,7 @@ class _WelcomeState extends State<Welcome> {
                       ),
                       Row(children: <Widget>[
                         const SizedBox(
-                          width: 10,
+                          width: 10.0,
                         ),
                         Checkbox(
                             value: valueChecked,
@@ -102,7 +102,8 @@ class _WelcomeState extends State<Welcome> {
                         const Text(
                           'Accept the Terms and Conditions',
                           style: TextStyle(
-                            fontSize: 17,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 15,
                           ),
                         ),
                       ]),

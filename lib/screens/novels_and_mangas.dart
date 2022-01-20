@@ -1,3 +1,4 @@
+import 'package:enta/screens/create_user.dart';
 import 'package:flutter/material.dart';
 
 class NovelsAndMangas extends StatelessWidget {
@@ -13,7 +14,10 @@ class NovelsAndMangas extends StatelessWidget {
       child: MaterialButton(
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
-        onPressed: () {}, //anonymous function
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateUser()),
+          );
+        }, //anonymous function
         child: const Text(
           "Next",
           textAlign: TextAlign.center,
