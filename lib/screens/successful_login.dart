@@ -1,14 +1,39 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enta/model/usermodel.dart';
 import 'package:enta/screens/create_user.dart';
 import 'package:enta/screens/welcome_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class SuccessLoginLogout extends StatelessWidget {
-  const SuccessLoginLogout({Key? key}) : super(key: key);
+class SuccessfulLogin extends StatefulWidget {
+  const SuccessfulLogin({Key? key}) : super(key: key);
+
+  @override
+  _SuccessfulLoginState createState() => _SuccessfulLoginState();
+}
+
+class _SuccessfulLoginState extends State<SuccessfulLogin> {
+//fireStore Connection and get currentLoggedIn User
+  User? user = FirebaseAuth.instance.currentUser;
+  UserModel loggedUser = UserModel();
+
+//fetch fireStore data by userid
+  void initState() {
+    super.initState();
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(user!.uid) //get values for the user
+        .get()
+        .then((value) {
+      loggedUser = UserModel.fromMap(value.data());
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    //watch movies button
+    //update button
     final watchButton = Material(
       elevation: 5,
       borderRadius: BorderRadius.circular(30),
@@ -17,12 +42,15 @@ class SuccessLoginLogout extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateUser()),);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateUser()),
+          );
         }, //anonymous function
         child: const Text(
           "Update",
           textAlign: TextAlign.center,
-          style:  TextStyle(
+          style: TextStyle(
               fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
         ),
       ),
@@ -37,76 +65,80 @@ class SuccessLoginLogout extends StatelessWidget {
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(30.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    //userIcon
+                    SizedBox(
+                      height: 200,
+                      child: Image.asset(
+                        "assets/user.png",
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
 
-                      //userIcon
-                      SizedBox(
-                        height: 200,
-                        child: Image.asset(
-                          "assets/user.png",
-                          fit: BoxFit.contain,
-                        ),
+                    Text(
+                      "${loggedUser.username}",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 50,
                       ),
-                      const SizedBox(
-                        height: 30,
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    const Text(
+                      "Book readers with this feature can enjoy the favorite"
+                          "novels and mangas straight from your device",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
                       ),
-
-                      const Text(
-                        "Username",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 50,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      const Text(
-                        "Book readers with this feature can enjoy the favorite"
-                            "novels and mangas straight from your device",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      watchButton,
-                      const SizedBox(
-                        height: 15,
-                      ),
-
-                      //gesture detector
-                      GestureDetector(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const Welcome()
-                          ),);
-                        },
-                        child: const Text(
-                          "Log out account",
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    watchButton,
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    ActionChip(
+                        backgroundColor: Colors.transparent,
+                        label: const Text(
+                          "log Out account",
                           style: TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.w700,
                             fontSize: 18,
                           ),
                         ),
-                      ),
-
-                      const SizedBox(
-                        height: 30,
-                      ),
-                    ]),
+                        onPressed: () {
+                          logout(context);
+                        }),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                  ]),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  //logout function
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Fluttertoast.showToast(msg: "logOut successful");
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const Welcome()),
     );
   }
 }

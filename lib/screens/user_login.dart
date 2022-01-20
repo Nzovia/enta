@@ -182,7 +182,7 @@ class _UserLoginState extends State<UserLogin> {
         .then((uid) => {
           Fluttertoast.showToast(msg: "login successful"),
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)
-      =>const SuccessLoginLogout()))
+      =>const SuccessfulLogin()))
     }).catchError((exception){
       Fluttertoast.showToast(msg: exception!.message);
     });
