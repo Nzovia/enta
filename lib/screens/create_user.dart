@@ -1,9 +1,16 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enta/model/usermodel.dart';
 import 'package:enta/screens/user_login.dart';
+import 'package:enta/widgets/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import "package:image_picker/image_picker.dart";
+import 'package:path/path.dart' as path;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage; //for file upload
 
 class CreateUser extends StatefulWidget {
   const CreateUser({Key? key}) : super(key: key);
@@ -13,9 +20,9 @@ class CreateUser extends StatefulWidget {
 }
 
 class _CreateUserState extends State<CreateUser> {
-  //parameters of the class
-
+  //firebase
   final _auth = FirebaseAuth.instance;
+  FirebaseStorage storageReference = FirebaseStorage.instance;
 
   //form key
   final _formKey = GlobalKey<FormState>();
@@ -24,6 +31,11 @@ class _CreateUserState extends State<CreateUser> {
   final userNameController = new TextEditingController();
   final emailAddressController = new TextEditingController();
   final userPasswordController = new TextEditingController();
+
+  //image properties to enhance 'dart:io' library
+  File? _pickedImage;
+  String? _uploadedFileURL;
+  final uploadId = DateTime.now().microsecondsSinceEpoch.toString();
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +153,13 @@ class _CreateUserState extends State<CreateUser> {
         //assigning createUser function to the registerButton
         onPressed: () {
           createUser(emailAddressController.text, userPasswordController.text);
+
+          if(_pickedImage!= null){
+            uploadFile();
+          }else{
+            Fluttertoast.showToast(msg: "No image selected");
+          }
+
         }, //anonymous function
         child: const Text(
           "Create",
@@ -154,6 +173,7 @@ class _CreateUserState extends State<CreateUser> {
     //designing our application
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: buildAppBar(context),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -166,11 +186,27 @@ class _CreateUserState extends State<CreateUser> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(
-                        height: 100,
-                        child: Image.asset(
-                          "assets/add_user.png",
-                          fit: BoxFit.contain,
+                      CircleAvatar(
+                        backgroundColor: Colors.grey,
+                        radius: 70,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          backgroundImage: _pickedImage == null
+                              ? null
+                              : FileImage(_pickedImage!),
+                          radius: 68,
+                          child: IconButton(
+                            // remove default padding here
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.black,
+                            ),
+                            color: Colors.white,
+                            onPressed: () {
+                              pickImage();
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(
@@ -204,7 +240,7 @@ class _CreateUserState extends State<CreateUser> {
                         height: 15,
                       ),
                       Row(children: <Widget>[
-                        SizedBox(
+                        const SizedBox(
                           width: 10.0,
                         ),
                         const Text(
@@ -240,20 +276,62 @@ class _CreateUserState extends State<CreateUser> {
   }
 
   //user creation function
-  void createUser(String email, String password) async {
+  Future createUser(String email, String password) async {
     //meaning -> if _formKey validation is successful, we wait for authentication
     if (_formKey.currentState!.validate()) {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
-          .then((value) => {postDetailsToFirestore()})
+          .then((value) => {postDetailsToFirestore(_uploadedFileURL)})
           .catchError((exception) {
-        Fluttertoast.showToast(msg: "e!.message");
+            createUser(email, password);
+           Fluttertoast.showToast(msg: "e!.message");
       });
     }
   }
 
-  //posting details function
-  postDetailsToFirestore() async {
+  //picking image from internal story function
+  Future pickImage() async {
+    //code throws exception when user denies access permission
+    try {
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      final imageTemporary = File(image.path);
+      setState(() => _pickedImage = imageTemporary);
+    } on PlatformException catch (e) {
+      print('Unable to pick image: $e');
+    }
+  }
+
+  //uploading image file function
+  Future uploadFile() async {
+    // storageReference =
+    //     firebase_storage.instance.ref().child('userimages/${uploadId}');
+    firebase_storage.UploadTask uploadTask = firebase_storage.FirebaseStorage
+        .instance
+        .ref()
+        .child('userimages/${uploadId}')
+        .putFile(_pickedImage!);
+  //  storageReference.putFile(_pickedImage!);
+
+    try{
+      firebase_storage.TaskSnapshot snapshot= await uploadTask;
+      _uploadedFileURL = await snapshot.ref.getDownloadURL();
+       postDetailsToFirestore(_uploadedFileURL);
+    }on FirebaseException catch(e) {
+      if (e.code == "request rejected");
+    }
+    // await uploadTask.then((fileURL) {
+    //   setState(() {
+    //     _uploadedFileURL = fileURL as String?;
+    //
+    //     postDetailsToFirestore(_uploadedFileURL);
+    //   });
+    //   print(_uploadedFileURL);
+    // });
+  }
+
+  //the function adds data to the database
+ Future postDetailsToFirestore(_uploadedFileURL) async {
     //calling  fireStore
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     User? user = _auth.currentUser;
@@ -265,6 +343,7 @@ class _CreateUserState extends State<CreateUser> {
     userModel.email = user!.email;
     userModel.uid = user.uid;
     userModel.username = userNameController.text;
+    userModel.imageUrl = _uploadedFileURL;
 
     //add firebaseFirestore
     await firebaseFirestore
@@ -272,9 +351,8 @@ class _CreateUserState extends State<CreateUser> {
         .doc(user.uid)
         .set(userModel.toMap());
     Fluttertoast.showToast(msg: "user created successfully");
-
     //navigating to logicScreen
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:
-        (context) => UserLogin()), (route) => false);
+    Navigator.pushAndRemoveUntil((context),
+        MaterialPageRoute(builder: (context) => UserLogin()), (route) => false);
   }
 }

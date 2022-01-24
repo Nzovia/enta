@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "768687652620",
-    "project_id": "enta-83352",
-    "storage_bucket": "enta-83352.appspot.com"
+    "project_number": "870089360822",
+    "project_id": "tracomapp-6e87c",
+    "storage_bucket": "tracomapp-6e87c.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:768687652620:android:2ed15a3141609476265329",
+        "mobilesdk_app_id": "1:870089360822:android:b498b6dee87284bcafad17",
         "android_client_info": {
           "package_name": "com.example.enta"
         }
       },
       "oauth_client": [
         {
-          "client_id": "768687652620-6u1utc1ua01ot2cl8ruijakqcets2nak.apps.googleusercontent.com",
+          "client_id": "870089360822-3rqfoqejc86vcim1vhh5l95n9vipbvlk.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.enta",
@@ -22,20 +22,20 @@
           }
         },
         {
-          "client_id": "768687652620-4udohvr1i9338ehpaquucuaifk4u24nk.apps.googleusercontent.com",
+          "client_id": "870089360822-2avuoulapc131aviffvbs4ci9mk6n885.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDhVPwhzsL3XS1aU_EMcdCsbtYaAYkIkjA"
+          "current_key": "AIzaSyC9jki4olbFexVw7JDuxi_jElSfSOVNEck"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "768687652620-4udohvr1i9338ehpaquucuaifk4u24nk.apps.googleusercontent.com",
+              "client_id": "870089360822-2avuoulapc131aviffvbs4ci9mk6n885.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

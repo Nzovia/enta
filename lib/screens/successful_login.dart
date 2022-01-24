@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enta/model/usermodel.dart';
 import 'package:enta/screens/create_user.dart';
-import 'package:enta/screens/welcome_screen.dart';
+import 'package:enta/widgets/appbar.dart';
+import 'package:enta/widgets/profile_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import 'onboarding_screen.dart';
 
 class SuccessfulLogin extends StatefulWidget {
   const SuccessfulLogin({Key? key}) : super(key: key);
@@ -42,11 +45,14 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateUser()),
+          upDateData(
+            uid: 'uid',
+            email: 'email',
+            username: 'username',
+
           );
         }, //anonymous function
+
         child: const Text(
           "Update",
           textAlign: TextAlign.center,
@@ -59,6 +65,7 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
     //Bringing together our UI widgets, all widgets container
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: buildAppBar(context),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -69,16 +76,16 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    //userIcon
+                    // //userIcon
                     SizedBox(
-                      height: 200,
-                      child: Image.asset(
-                        "assets/user.png",
-                        fit: BoxFit.contain,
+                      height: 150,
+                      child: ClipOval(
+                        child: Image.network("${loggedUser.imageUrl}",
+                        width: 150.0,
+                          height: 150.0,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 30,
                     ),
 
                     Text(
@@ -89,12 +96,21 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
                         fontSize: 50,
                       ),
                     ),
+
+                    Text(
+                      "${loggedUser.email}",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w200,
+                        fontSize: 17,
+                      ),
+                    ),
                     const SizedBox(
                       height: 30,
                     ),
                     const Text(
                       "Book readers with this feature can enjoy the favorite"
-                          "novels and mangas straight from your device",
+                      "novels and mangas straight from your device",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey,
@@ -138,7 +154,31 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
     await FirebaseAuth.instance.signOut();
     Fluttertoast.showToast(msg: "logOut successful");
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const Welcome()),
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
     );
+  }
+
+  //updating data in the firebase
+  Future<void> upDateData({
+    required String username,
+    required String email,
+    required String uid,
+  }) async {
+    Map<String, dynamic> data = <String, dynamic>{
+      "username": username,
+      "email": email,
+    };
+    DocumentReference documentReferencer =
+        FirebaseFirestore.instance.collection('users').doc(uid);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateUser()),
+    );
+
+    await documentReferencer
+        .update(data)
+        .whenComplete(() => print("Note item updated in the database"))
+        .catchError((e) => print(e));
   }
 }
