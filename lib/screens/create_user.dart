@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enta/components/widgets/appbar.dart';
 import 'package:enta/model/usermodel.dart';
 import 'package:enta/screens/user_login.dart';
-import 'package:enta/widgets/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -145,7 +145,7 @@ class _CreateUserState extends State<CreateUser> {
     final registerButton = Material(
       elevation: 5,
       borderRadius: BorderRadius.circular(30),
-      color: Colors.grey,
+      color: Colors.lightGreen,
       child: MaterialButton(
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
@@ -257,7 +257,7 @@ class _CreateUserState extends State<CreateUser> {
                                     builder: (context) => UserLogin()));
                           },
                           child: const Text(
-                            "  Login",
+                            " Login",
                             style: TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,

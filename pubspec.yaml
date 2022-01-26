@@ -64,15 +64,16 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
-  uses-material-design: true
+  uses-material-design: false
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/popcorn.png
-     - assets/music.png
-     - assets/book.png
-     - assets/add_user.png
-     - assets/user.png
+    - assets/popcorn.png
+    - assets/music.png
+    - assets/book.png
+    - assets/add_user.png
+    - assets/user.png
+    - assets/movieshome.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

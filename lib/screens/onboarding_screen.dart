@@ -1,5 +1,6 @@
+import 'package:enta/components/widgets/body_widget.dart';
+import 'package:enta/components/widgets/buttons_widget.dart';
 import 'package:enta/screens/create_user.dart';
-import 'package:enta/widgets/buttons_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
@@ -13,7 +14,7 @@ class OnboardingScreen extends StatelessWidget {
             //holds all the pages
             PageViewModel(
               title: "ENTA",
-              body: "Read Terms and Conditions",
+              bodyWidget: const BodyWidget(),
               image: buildImage("assets/popcorn.png"),
               decoration: getPageDecoration(),
             ),
@@ -62,7 +63,7 @@ class OnboardingScreen extends StatelessWidget {
   buildImage(String path) => Center(
         child: Image.asset(
           path,
-          width: 500,
+          width: 700,
         ),
       );
 
@@ -85,6 +86,7 @@ class OnboardingScreen extends StatelessWidget {
             const TextStyle(fontWeight: FontWeight.w300, fontSize: 18),
         descriptionPadding: const EdgeInsets.all(16).copyWith(bottom: 0),
         imagePadding: const EdgeInsets.all(24),
+
         pageColor: Colors.white,
       );
 

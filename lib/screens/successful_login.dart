@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enta/components/widgets/appbar.dart';
 import 'package:enta/model/usermodel.dart';
 import 'package:enta/screens/create_user.dart';
-import 'package:enta/widgets/appbar.dart';
-import 'package:enta/widgets/profile_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -45,12 +44,7 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
         padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: 200.0,
         onPressed: () {
-          upDateData(
-            uid: 'uid',
-            email: 'email',
-            username: 'username',
-
-          );
+         openPage();
         }, //anonymous function
 
         child: const Text(
@@ -163,22 +157,32 @@ class _SuccessfulLoginState extends State<SuccessfulLogin> {
     required String username,
     required String email,
     required String uid,
+    required String imageUrl,
   }) async {
-    Map<String, dynamic> data = <String, dynamic>{
-      "username": username,
-      "email": email,
-    };
+    //cdatabase refrence
     DocumentReference documentReferencer =
-        FirebaseFirestore.instance.collection('users').doc(uid);
+    FirebaseFirestore.instance.collection('users').doc(uid);
+
+    //sending data to the server
+    Map<String, dynamic> toMap() {
+    return {
+    'uid': uid,
+    'username': username,
+    'email': email,
+    'imageUrl': imageUrl,
+    };
+    }
+
+  }
+
+  void openPage() {
 
     Navigator.push(
+
       context,
       MaterialPageRoute(builder: (context) => const CreateUser()),
     );
 
-    await documentReferencer
-        .update(data)
-        .whenComplete(() => print("Note item updated in the database"))
-        .catchError((e) => print(e));
+
   }
 }
